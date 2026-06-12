@@ -1,38 +1,54 @@
-# Raúl Mermans
+# Raul Mermans
 
-**AI Systems · Agents · Automation**
+Creative-technical strategist building AI-powered systems for brand, business, and cultural workflows.
 
-I design and build AI workflow systems, automation layers, internal tools, and product-minded interfaces for modern brands.
+I design and build internal tools, automation systems, dashboards, and bounded AI workflows that turn messy inputs into structured decisions.
 
-My work sits between business logic, creative direction, and applied AI engineering: turning repetitive, judgment-heavy work into structured systems that are observable, reliable, and useful beyond the demo.
+A useful AI product is not just a prompt. It is a system: workflow logic, tools, data, evaluation, human review, interface design, and deployment discipline.
+
+---
+
+## Focus
+
+- AI workflow systems
+- Internal tools and automation
+- Data-to-insight products
+- Brand and creative intelligence
+- Human-in-the-loop AI systems
+- Product strategy and interface design
+
+---
 
 ## Selected Work
 
-| Project | System Type | What it Shows |
-|---|---|---|
-| [Website Auditor](https://github.com/RaulMermans/website-auditor) | Agentic audit workflow | Deterministic website auditing, worker execution, bounded LLM synthesis, internal tooling |
-| [DataBrief AI](https://github.com/RaulMermans/DataBrief-AI) | Data analysis workflow | CSV/XLSX profiling, generated Python analysis, structured findings, exportable reports |
-| [Benchmark Dashboard](https://github.com/RaulMermans/benchmark_dashboard) | Analytics interface | JSON-driven executive dashboard, benchmark intelligence, reusable frontend architecture |
+### Website Auditor
+Evidence-based website audit system that captures live site data, scores performance and content quality, and generates structured recommendations with bounded AI synthesis.
 
-## Focus Areas
+**What it proves:** AI workflow architecture, evidence collection, deterministic scoring, report generation, and full-stack execution.
 
-- Agentic workflows
-- AI orchestration
-- Human review loops
-- Automation infrastructure
-- Internal tools and AI prototypes
-- Business intelligence interfaces
-- Brand, content, and creative operations systems
+### DataBrief AI
+Spreadsheet intelligence system that transforms CSV/XLSX files into grounded analysis, summaries, and decision-ready outputs.
 
-## Operating Thesis
+**What it proves:** data profiling, controlled code execution, AI-assisted analysis, and bounded automation.
 
-A useful AI product is not just a prompt.  
-It is a system: workflow logic, tools, data, evaluation, human review, interface design, and deployment discipline.
+### Benchmark Dashboard
+Executive dashboard framework for structured comparison, benchmarking, and business intelligence.
 
-## Stack
+**What it proves:** BI systems, data contracts, dashboard architecture, and executive-facing product design.
 
-TypeScript · React · Next.js · Python · Tailwind · PostgreSQL · Playwright · Vitest · LLM workflows · Data visualization
+### Raul Portfolio
+Personal portfolio connecting brand strategy, cultural storytelling, creative direction, photography, and technical execution.
 
-## Portfolio
+**What it proves:** narrative design, visual identity, creative systems, and positioning.
 
-[raulmermans.com](https://www.raulmermans.com/en/)
+---
+
+## Technical Stack
+
+Next.js · TypeScript · React · Python · PostgreSQL · Playwright · LLM workflows · Vercel · GitHub Actions
+
+---
+
+## Core Positioning
+
+I build creative-business infrastructure: AI-powered tools, dashboards, and workflows that help teams analyze, decide, and execute faster.
