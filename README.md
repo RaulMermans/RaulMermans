@@ -1,85 +1,161 @@
-# Raul Mermans
+# Raúl Mermans
 
-Creative-technical strategist building AI workflow systems for brand, strategy, editorial, and decision-support work.
+**Multidisciplinary builder working across AI, product, data, strategy, and creative systems.**
 
-I design and build internal tools, dashboards, automation layers, and bounded AI systems that turn messy inputs into structured decisions, reviewable outputs, and usable business artifacts.
+I build tools, workflows, dashboards, and digital products that turn complex ideas into structured, usable systems. My work moves across business intelligence, marketing technology, automation, forecasting, content systems, interface design, and creative strategy.
 
-A useful AI product is not just a prompt. It is a system: workflow logic, data, tools, evaluation, human review, interface design, and deployment discipline.
-
----
-
-## Focus
-
-* AI workflow systems
-* Internal tools and automation
-* Creative strategy infrastructure
-* Data-to-insight products
-* Human-in-the-loop AI systems
-* Brand, editorial, and campaign intelligence
-* Product strategy and interface design
+I am interested in how technology can support better thinking: clearer decisions, stronger execution, sharper storytelling, and more intelligent workflows.
 
 ---
 
-## Selected Work
+## What I Do
 
-### Campaign Sandbox
+I work across several connected areas:
 
-AI campaign strategy workspace for turning messy briefs into strategic routes, synthetic audience hypotheses, risk reviews, human-selected plans, and exportable campaign artifacts.
+- AI-assisted workflows and internal tools  
+- Business intelligence dashboards and decision-support systems  
+- Marketing, campaign, and performance analysis tools  
+- Data analysis, forecasting, and reporting systems  
+- Product prototypes and interface design  
+- Creative strategy, brand systems, and digital storytelling  
+- Automation layers that make complex processes easier to manage  
 
-**What it proves:** creative strategy workflows, bounded LLM product design, deterministic scoring, human-gated decision-making, proof-integrity checks, and PPTX/HTML/Markdown export.
-
----
-
-### BlogAgent
-
-Evidence-aware editorial drafting system for source-grounded blog articles.
-
-BlogAgent explores how generative writing can be wrapped inside deterministic workflow control: query contracts, source scoring, recommendation candidate validation, claim checks, structured handoffs, and a final copy-readiness contract.
-
-**What it proves:** source-grounded AI writing, candidate validation, claim checking, structured agent handoffs, final-answer contract design, and mock-safe CI.
+My projects are intentionally varied. They are experiments in applying technical thinking to different kinds of problems: strategic, analytical, operational, creative, and commercial.
 
 ---
 
-### Website Auditor
+## Selected Projects
 
-Evidence-based website audit system that captures live site data, scores performance and content quality, and generates structured recommendations with bounded AI synthesis.
+### [Campaign Sandbox](https://github.com/RaulMermans/campaign-sandbox)
 
-**What it proves:** AI workflow architecture, evidence collection, deterministic scoring, report generation, Playwright automation, and full-stack execution.
+A campaign strategy workspace for transforming rough briefs into structured campaign directions, audience hypotheses, risk reviews, and exportable planning artifacts.
 
----
-
-### DataBrief AI
-
-Spreadsheet intelligence system that transforms CSV/XLSX files into grounded analysis, summaries, and decision-ready outputs.
-
-**What it proves:** data profiling, controlled code execution, AI-assisted analysis, report generation, and bounded automation.
+**Focus areas:**  
+AI workflows · campaign strategy · decision support · structured planning
 
 ---
 
-### Benchmark Dashboard
+### [BlogAgent](https://github.com/RaulMermans/BlogAgent)
 
-Executive dashboard framework for structured comparison, benchmarking, and business intelligence.
+An editorial workflow system that helps transform topics into source-aware draft packages with validation, scoring, and review steps.
 
-**What it proves:** BI systems, data contracts, calculation layers, dashboard architecture, and executive-facing product design.
-
----
-
-### Raul Portfolio
-
-Personal portfolio connecting brand strategy, cultural storytelling, creative direction, photography, and technical execution.
-
-**What it proves:** narrative design, visual identity, creative systems, positioning, and static-site execution.
+**Focus areas:**  
+AI writing systems · research workflows · content operations · validation logic
 
 ---
 
-## Technical Stack
+### [DataBrief AI](https://github.com/RaulMermans/DataBrief-AI)
 
-Next.js · TypeScript · React · Python · FastAPI · PostgreSQL · Playwright · Zod · Tailwind · LLM workflows · Vercel · GitHub Actions
+A spreadsheet intelligence tool that turns CSV/XLSX files into structured business reports and analytical outputs.
+
+**Focus areas:**  
+Data analysis · business reporting · AI-assisted insight generation · file-based workflows
 
 ---
 
-## Core Positioning
+### [Website Auditor](https://github.com/RaulMermans/website-auditor)
 
-I build creative-business infrastructure: AI-powered tools, dashboards, and workflows that help teams analyze, decide, create, and execute with more structure.
+A website analysis system that captures public evidence, scores performance signals, and generates structured audit reports.
 
-My work sits between strategy and systems: turning ambiguous business, brand, editorial, and campaign problems into interfaces, workflows, evaluators, and artifacts that people can actually use.
+**Focus areas:**  
+Website intelligence · automation · scoring systems · full-stack product workflows
+
+---
+
+### [Campaign Pulse](https://github.com/RaulMermans/campaign-pulse)
+
+A performance command center for campaign, segment, revenue, and saturation analysis.
+
+**Focus areas:**  
+Marketing analytics · dashboard design · revenue intelligence · performance monitoring
+
+---
+
+### [demand-OS](https://github.com/RaulMermans/demand-OS)
+
+A demand forecasting and inventory risk platform built around raw commerce data and deterministic machine-learning workflows.
+
+**Focus areas:**  
+Forecasting · commerce data · ML pipelines · operational intelligence
+
+---
+
+### [Benchmark Dashboard](https://github.com/RaulMermans/benchmark_dashboard)
+
+A competitive intelligence dashboard for benchmarking companies, markets, or business units through structured calculations and executive-facing views.
+
+**Focus areas:**  
+Benchmarking · business intelligence · data contracts · dashboard architecture
+
+---
+
+### [Raúl Portfolio](https://github.com/RaulMermans/raul-portfolio)
+
+A personal portfolio system combining brand strategy, visual direction, case studies, AI/product work, and creative storytelling.
+
+**Focus areas:**  
+Brand systems · narrative design · front-end execution · creative identity
+
+---
+
+## Technical Areas
+
+**Languages**  
+Python · TypeScript · JavaScript
+
+**Frontend**  
+React · Next.js · Tailwind CSS · Vite
+
+**Backend and Data**  
+FastAPI · PostgreSQL · Pandas · CSV/XLSX workflows · ML pipelines
+
+**AI and Automation**  
+LLM workflows · structured prompts · validation gates · human-in-the-loop systems · report generation
+
+**Product and Strategy**  
+Dashboards · internal tools · campaign systems · business intelligence · creative workflows · digital products
+
+---
+
+## How I Think
+
+I use code as a way to structure ideas.
+
+For me, building is not only about shipping features. It is about designing systems that help people understand, decide, create, and act with more clarity.
+
+The common thread across my work is not one industry or one type of product.  
+It is the ability to move between disciplines and connect them:
+
+- strategy with execution  
+- creativity with structure  
+- data with narrative  
+- automation with human judgment  
+- interfaces with decision-making  
+
+That is the kind of work I want to keep building: intelligent, useful systems that sit between business, creativity, and technology.
+
+---
+
+## Current Direction
+
+I am currently exploring:
+
+- AI-native internal tools  
+- Business and marketing intelligence systems  
+- Data-driven strategy workflows  
+- Creative automation  
+- Product prototypes  
+- Dashboards for decision-making  
+- Systems that help teams move from information to action  
+
+---
+
+## Links
+
+- Portfolio: [raulmermans.com](https://www.raulmermans.com/en/)
+- LinkedIn: [linkedin.com/in/raulmermans](https://www.linkedin.com/in/raulmermans/)
+- GitHub: [github.com/RaulMermans](https://github.com/RaulMermans)
+
+---
+
+**Building across disciplines — where strategy, technology, data, and creativity meet.**
