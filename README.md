@@ -1,20 +1,28 @@
 # Raúl Mermans
 
-**I build intelligent systems across AI, data, product, and brand.**
+**I design and build decision systems that connect AI, data, product, and brand.**
 
-I use code to turn complex ideas, fragmented information, and ambiguous workflows into structured products, decision tools, and digital experiences.
+I use code to turn complex ideas, fragmented information, and ambiguous workflows into structured products, analytical tools, and digital experiences.
 
-My work combines technical execution, business logic, visual judgment, and human-centered system design.
+My work combines technical execution, business logic, visual judgment, and human-centered product design.
 
 ---
 
 ## Selected Work
 
-### [Campaign Sandbox](https://github.com/RaulMermans/campaign-sandbox)
+### [OpsTwin](https://github.com/RaulMermans/OpsTwin)
 
-AI-assisted campaign strategy workspace that turns rough briefs into structured strategic routes, risk reviews, and execution-ready plans.
+Operational simulation and decision-support product for testing service-workflow changes before implementing them.
 
-**Focus:** Applied AI · Campaign strategy · Decision support · Human-in-the-loop workflows
+OpsTwin compares operational scenarios—such as adding staff or reducing processing time—through paired simulations, uncertainty analysis, risk evidence, and structured decision outputs.
+
+**Role:** Product design · Architecture · Implementation · Verification
+
+**Focus:** Operational intelligence · Simulation · Decision support · Product engineering
+
+**Stack:** Next.js · React · TypeScript · FastAPI · Python · SimPy
+
+[Live Demo](https://ops-twin.vercel.app) · [Guided Workspace](https://ops-twin.vercel.app/workspace)
 
 ---
 
@@ -22,42 +30,51 @@ AI-assisted campaign strategy workspace that turns rough briefs into structured 
 
 Evidence-bounded website intelligence system that captures public signals, generates deterministic findings, and translates them into structured strategic insights.
 
-**Focus:** Full-stack product development · Browser automation · AI synthesis · Scoring systems
+The product combines browser automation, scoring systems, AI synthesis, and report generation to move from raw website evidence to actionable recommendations.
+
+**Focus:** Applied AI · Browser automation · Scoring systems · Strategic intelligence
+
+**Stack:** Next.js · TypeScript · FastAPI · Python
 
 ---
 
-### [Campaign Pulse](https://github.com/RaulMermans/campaign-pulse)
+### [Campaign Sandbox](https://github.com/RaulMermans/campaign-sandbox)
 
-Marketing intelligence dashboard for analyzing campaign performance, audience pressure, revenue, targets, and segment movement.
+AI-assisted campaign strategy workspace that transforms rough briefs into structured strategic routes, audience hypotheses, risk reviews, and execution-ready plans.
 
-**Focus:** Business intelligence · Marketing analytics · Dashboard design · Decision systems
+The system is designed around human review, structured generation, and clearer decision-making rather than one-click creative output.
+
+**Focus:** Applied AI · Campaign strategy · Decision support · Human-in-the-loop workflows
+
+**Stack:** TypeScript · React · Structured LLM workflows
 
 ---
 
 ## Other Projects
 
+* [Campaign Pulse](https://github.com/RaulMermans/campaign-pulse) — Marketing intelligence dashboard for campaign performance, audience pressure, revenue, targets, and segment movement
 * [DataBrief AI](https://github.com/RaulMermans/DataBrief-AI) — Spreadsheet intelligence and grounded business reporting
 * [DemandOS](https://github.com/RaulMermans/demand-OS) — Demand forecasting and inventory-risk intelligence
 * [BlogAgent](https://github.com/RaulMermans/BlogAgent) — Evidence-aware editorial workflow system
 * [TerritoryOps Spain](https://github.com/RaulMermans/territoryops-spain) — Real-estate opportunity and pipeline console
 * [Benchmark Dashboard](https://github.com/RaulMermans/benchmark_dashboard) — Competitive benchmarking and scenario forecasting
-* [Portfolio](https://github.com/RaulMermans/raul-portfolio) — Personal portfolio and case-study system
+* [Portfolio](https://github.com/RaulMermans/raul-portfolio) — Personal portfolio and case-study platform
 
 ---
 
-## What I Work Across
+## What I Build
 
 ### AI Products and Workflows
 
-Structured generation, agentic workflows, internal tools, validation systems, automation, and human review.
+Structured generation, agentic workflows, validation systems, automation, internal tools, and human review.
 
 ### Intelligence and Decision Systems
 
-Dashboards, forecasting, reporting, campaign analytics, CRM logic, and operational intelligence.
+Simulation, forecasting, dashboards, reporting, campaign analytics, scoring systems, and operational intelligence.
 
-### Brand and Product Systems
+### Product and Brand Experiences
 
-Positioning, interface design, narrative structure, creative direction, and digital experiences.
+Product strategy, interface design, positioning, narrative structure, creative direction, and digital experiences.
 
 ---
 
@@ -70,18 +87,18 @@ Python · TypeScript · JavaScript
 Next.js · React · Tailwind CSS · Vite
 
 **Backend and Data**
-FastAPI · PostgreSQL · Pandas · CSV/XLSX workflows · Machine-learning pipelines
+FastAPI · PostgreSQL · Pandas · SimPy · CSV/XLSX workflows · Machine-learning pipelines
 
 **AI and Automation**
-LLM workflows · Structured outputs · Validation gates · Human-in-the-loop systems · Report generation
+LLM workflows · Structured outputs · Validation gates · Human-in-the-loop systems · Browser automation · Report generation
 
 ---
 
-## How I Think
+## How I Work
 
 I use code as a way to structure ideas.
 
-The common thread across my work is the ability to connect:
+Across my work, I connect:
 
 * Strategy with execution
 * Data with narrative
@@ -89,7 +106,7 @@ The common thread across my work is the ability to connect:
 * Interfaces with decision-making
 * Technology with brand and culture
 
-I am interested in building systems that help people understand, decide, create, and act with greater clarity.
+I am interested in building systems that help people understand complexity, evaluate alternatives, and act with greater clarity.
 
 ---
 
@@ -97,9 +114,7 @@ I am interested in building systems that help people understand, decide, create,
 
 * [Portfolio](https://www.raulmermans.com/en/)
 * [LinkedIn](https://www.linkedin.com/in/raulmermans/)
-* [GitHub](https://github.com/RaulMermans)
-
 
 ---
 
-**Building across disciplines — where strategy, technology, data, and creativity meet.**
+**Building useful systems at the intersection of technology, business, and culture.**
