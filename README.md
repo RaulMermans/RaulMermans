@@ -1,100 +1,41 @@
-# Raúl Mermans
+### Raúl Mermans
 
-**Applied AI & Agentic Systems · AI Engineering · Automation**
-
-I build AI agents, intelligent workflows, and data-driven systems designed to move AI from experimentation into reliable operational use.
-
-Currently focused on **agent orchestration, persistent memory, tool use, evaluation, local inference, and governed autonomy**.
+**Applied AI & Software Engineer.** I build analytical runtimes, AI agents, agent infrastructure and local-first AI tooling, and I measure whether they work.
 
 [Portfolio](https://www.raulmermans.com/en/) · [LinkedIn](https://www.linkedin.com/in/raulmermans/)
 
 ---
 
-## Selected Work
+#### Selected work
 
-### [JARVIS OS](https://github.com/RaulMermans/JARVIS-OS)
+| Project | What it is | Strongest evidence |
+| --- | --- | --- |
+| **[BI Notebook Lab](https://github.com/RaulMermans/bi-notebook-lab)** | Browser-based analytical runtime that teaches how BI semantic models compute: DAX lexer → parser → binder → evaluator, filter context, relationships, Power Query | 1,024 tests · 83-case DAX conformance suite with documented divergences · 100k-row benchmark |
+| **[OpsTwin](https://github.com/RaulMermans/OpsTwin)** | Operational simulation lab for testing service-workflow changes with paired simulation, sensitivity and uncertainty ranges | 247 backend + 172 frontend tests · strict typing · live deployment |
+| **[DataBrief AI](https://github.com/RaulMermans/DataBrief-AI)** | Bounded analytics workflow: CSV/XLSX → profiling → routed plan → sandboxed execution → grounded report | 176 backend tests · every finding cites the artifact it came from |
+| **[Open VS Code Agent](https://github.com/RaulMermans/Open-VS-Code-Agent)** | Coding agent designed and benchmarked for a local 7B open-weight model, with explicit tools, verification and crash-safe mutation | 24-task benchmark: 37.5% → 75.0% grounded success after evidence-driven orchestration |
+| **[JARVIS OS](https://github.com/RaulMermans/JARVIS-OS)** | Personal AI operating system built around one question, *what needs my attention today?*, with specialist agents, governed actions and human approval | Evidence-required attention · autonomy ladder · verified execution and recovery |
+| **[HALO Control](https://github.com/RaulMermans/AMD-HALO-Control)** | Control plane for a local AI workstation: model registry, capability routing, telemetry, workload authorization | Deterministic routing · metadata-only activity log · explicit mocked/real evidence classes |
 
-A personal agentic operating system where specialized agents coordinate attention, tasks, tools, memory, and governed actions.
+<sub>JARVIS OS, Open VS Code Agent and HALO Control are public architecture editions of private systems. BI Notebook Lab, OpsTwin and DataBrief AI are open source.</sub>
 
-Built around **multi-agent orchestration, persistent memory, prioritized work queues, autonomy controls, human approvals, recovery and rollback, observability, evaluations, and MCP integrations**.
+**Progression:** analytical systems (BI Notebook Lab, OpsTwin) → applied AI (DataBrief AI) → AI agents (Open VS Code Agent) → agent systems (JARVIS OS) → local AI infrastructure (HALO Control).
 
-`TypeScript` · `React` · `Fastify` · `PostgreSQL` · `MCP` · `CrewAI` · `Vitest` · `Playwright`
+#### Open source
 
----
+**[OpenLIT: LangGraph memory connector](https://github.com/openlit/openlit/pull/1667)** (open pull request). A LangGraph Store memory connector with memory CRUD/search, namespace mapping, authentication, safe content handling, docs and integration tests.
 
-### [DataBrief AI](https://github.com/RaulMermans/DataBrief-AI)
+#### Stack
 
-A bounded AI analytics system that transforms CSV/XLSX business data into computed findings, visualizations, executive reports, and exportable analysis.
+| | |
+| --- | --- |
+| **AI systems** | Agent orchestration (CrewAI), MCP, tool calling, memory, human-in-the-loop approval, Ollama and open-weight models |
+| **Evaluation** | Benchmark harnesses, conformance suites, failure taxonomies, Vitest, Pytest, Playwright |
+| **Backend** | TypeScript, Node.js, Fastify, Python, FastAPI, SimPy |
+| **Frontend** | React, Next.js, Vite, React Flow, Recharts |
+| **Data** | PostgreSQL, SQLite, IndexedDB, DAX and semantic modelling, Power BI concepts |
+| **Infrastructure** | Local inference, Vercel, GitHub Actions |
 
-The system separates deterministic computation from AI reasoning through **validation gates, controlled code execution, bounded repair, and grounded reporting**.
+#### Current focus
 
-`Next.js` · `TypeScript` · `FastAPI` · `Python`
-
----
-
-### [Website Audit Agent](https://github.com/RaulMermans/website-auditor)
-
-An evidence-driven AI audit system that captures public website signals, generates deterministic findings and scoring, and uses constrained LLM synthesis to produce structured business intelligence.
-
-Designed around a simple principle: **the model can interpret evidence, but it cannot create the underlying audit truth**.
-
-`Next.js` · `TypeScript` · `PostgreSQL` · `Browser Automation` · `Gemini`
-
----
-
-## Open Source
-
-### [OpenLIT · LangGraph Memory Connector](https://github.com/openlit/openlit/pull/1667)
-
-Contributing a LangGraph Store memory connector to OpenLIT with support for memory CRUD/search, namespace mapping, authentication, safe content handling, documentation, and integration tests.
-
-Current validation includes **356 test suites and 5,321 passing tests**.
-
-*Open pull request.*
-
----
-
-## More Projects
-
-[**OpsTwin**](https://github.com/RaulMermans/OpsTwin)
-Operational simulation and decision-support system using paired simulations and uncertainty analysis.
-
-[**SearchSignal**](https://github.com/RaulMermans/SearchSignal)
-Search and retrieval intelligence focused on evidence-grounded discovery.
-
-[**Campaign Sandbox**](https://github.com/RaulMermans/campaign-sandbox)
-AI-assisted campaign strategy with bounded generation, deterministic scoring, risk review, and human selection.
-
-[**DemandOS**](https://github.com/RaulMermans/demand-OS)
-Demand forecasting and inventory-risk intelligence.
-
-[**BlogAgent**](https://github.com/RaulMermans/BlogAgent)
-Evidence-aware editorial workflow system.
-
-[**Relay**](https://github.com/RaulMermans/Relay)
-Performance workspace for source-safe marketing and commerce reporting.
-
-[**BI Notebook Lab**](https://github.com/RaulMermans/bi-notebook-lab)
-Interactive environment for BI modelling and analytical concepts.
-
----
-
-## Technical Stack
-
-**AI & Agents**
-AI Agents · Multi-Agent Systems · Agent Orchestration · Tool Calling · Memory · RAG · LLM Evaluation · MCP · Human-in-the-Loop Systems · Structured Outputs
-
-**Engineering**
-Python · TypeScript · JavaScript · FastAPI · Django · Next.js · React · Node.js · REST APIs · PostgreSQL · SQLite · Docker · Git
-
-**AI Tooling**
-LangGraph · CrewAI · Ollama · Open-Weight LLMs · Claude Code · OpenAI Codex · Browser Automation · n8n
-
-**Data**
-SQL · Power BI · Pandas · Data Modelling · Forecasting · Simulation · Business Intelligence
-
----
-
-## Current Direction
-
-Building AI systems that are **useful, inspectable, recoverable, and reliable enough to earn autonomy in real workflows**.
+Agent systems on local and open-weight models, with an emphasis on reliability, memory, evaluation and orchestration, and on analytical runtimes that explain their own results.
