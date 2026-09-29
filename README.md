@@ -14,12 +14,12 @@
 | **[OpsTwin](https://github.com/RaulMermans/OpsTwin)** | Operational simulation lab comparing workflow changes with paired simulation | 430 tests (247 backend, 183 frontend) · live demo |
 | **[DataBrief AI](https://github.com/RaulMermans/DataBrief-AI)** | Bounded CSV/XLSX analysis pipeline producing grounded, source-cited reports | 176 backend tests · every finding cites its artifact |
 | **[Open VS Code Agent](https://github.com/RaulMermans/Open-VS-Code-Agent)** | Coding agent built and benchmarked for a local 7B open-weight model | 37.5% → 75.0% task success on a 24-task benchmark |
-| **[JARVIS OS](https://github.com/RaulMermans/JARVIS-OS)** | Personal AI OS: evidence-backed attention, governed agents, human approval | Architecture, contracts and synthetic traces |
+| **[IRIS OS](https://github.com/RaulMermans/IRIS-OS)** | Personal AI OS: evidence-backed attention, governed agents, human approval | Architecture, contracts and synthetic traces |
 | **[HALO Control](https://github.com/RaulMermans/AMD-HALO-Control)** | Local AI infrastructure control plane: model routing, telemetry, authorization | Architecture, contracts and a runnable routing demo |
 
-<sub>BI Notebook Lab, OpsTwin and DataBrief AI are open source (MIT). JARVIS OS, Open VS Code Agent and HALO Control are public architecture editions of active private systems.</sub>
+<sub>BI Notebook Lab, OpsTwin and DataBrief AI are open source (MIT). IRIS OS, Open VS Code Agent and HALO Control are public architecture editions of active private systems.</sub>
 
-**Progression:** analytical systems (BI Notebook Lab, OpsTwin) → applied AI (DataBrief AI) → AI agents (Open VS Code Agent) → agent systems (JARVIS OS) → local AI infrastructure (HALO Control).
+**Progression:** analytical systems (BI Notebook Lab, OpsTwin) → applied AI (DataBrief AI) → AI agents (Open VS Code Agent) → agent systems (IRIS OS) → local AI infrastructure (HALO Control).
 
 #### External open source
 
@@ -39,5 +39,5 @@
 #### Current focus
 
 - Extending the Open VS Code Agent benchmark to BUILD and DEBUG tasks on local models.
-- Governed execution and memory in JARVIS OS.
+- Governed execution and memory in IRIS OS.
 - Bringing HALO Control up on the AMD Halo target hardware.
