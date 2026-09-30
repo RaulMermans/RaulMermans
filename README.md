@@ -23,7 +23,9 @@
 
 #### External open source
 
-**[OpenLIT: LangGraph memory connector](https://github.com/openlit/openlit/pull/1667)** (open pull request). A LangGraph Store memory connector with memory CRUD/search, namespace mapping, authentication, safe content handling, docs and integration tests.
+- **[Lemonade: reject invalid backend-specific config keys](https://github.com/lemonade-sdk/lemonade/pull/3684)** (merged). Replaced a substring match in backend config validation with checks against each backend's declared variants, so misspelled keys such as `flm.flm_bin` fail instead of being silently ignored. Closes [#3678](https://github.com/lemonade-sdk/lemonade/issues/3678).
+- **[OpenLIT: LangGraph memory connector](https://github.com/openlit/openlit/pull/1667)** (open pull request). A LangGraph Store memory connector with memory CRUD/search, namespace mapping, authentication, safe content handling, docs and integration tests.
+- **[OpenJudge: reject degenerate empty-string matches](https://github.com/agentscope-ai/OpenJudge/pull/200)** (open pull request). A grader fix for degenerate empty-string matches.
 
 #### Stack
 
