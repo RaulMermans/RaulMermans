@@ -21,6 +21,10 @@
 
 **Progression:** analytical systems (BI Notebook Lab, OpsTwin) → applied AI (DataBrief AI) → AI agents (Open VS Code Agent) → agent systems (IRIS OS) → local AI infrastructure (HALO Control).
 
+#### Additional work
+
+**[Overflow](https://github.com/RaulMermans/overflow-training)**: an offline-resilient iOS training app (Expo, React Native, Supabase) with a dependency-aware sync outbox, row-level data isolation, program progression and 784 passing tests. It was assessed ready for an internal TestFlight beta.
+
 #### External open source
 
 - **[Lemonade: reject invalid backend-specific config keys](https://github.com/lemonade-sdk/lemonade/pull/3684)** (merged). Replaced a substring match in backend config validation with checks against each backend's declared variants, so misspelled keys such as `flm.flm_bin` fail instead of being silently ignored. Closes [#3678](https://github.com/lemonade-sdk/lemonade/issues/3678).
