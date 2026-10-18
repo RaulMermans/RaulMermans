@@ -1,39 +1,247 @@
-name: Generate contribution snake
+name: Generate Activity Signal
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '17 5 * * *'
   push:
     branches: [main]
     paths:
-      - README.md
-      - .github/workflows/snake.yml
-  schedule:
-    - cron: '23 3 * * 1'
+      - .github/workflows/blank.yml
 
 permissions:
   contents: write
 
 concurrency:
-  group: contribution-snake
+  group: activity-signal-publisher
   cancel-in-progress: false
 
 jobs:
-  generate:
+  publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Generate light and dark SVGs
-        uses: Platane/snk@v3
-        with:
-          github_user_name: ${{ github.repository_owner }}
-          outputs: |
-            dist/github-snake.svg
-            dist/github-snake-dark.svg?palette=github-dark
+      - name: Check out repository
+        uses: actions/checkout@v4
 
-      - name: Publish generated SVGs to output branch
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate from real public contributions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: |
+          python - <<'PYTHON'
+          #!/usr/bin/env python3
+          """Render a GitHub-contributions-backed animated SVG. Python stdlib only.
+          
+          Requires GH_TOKEN (GitHub Actions' GITHUB_TOKEN) to query public contributions.
+          The SVG's grid is sourced from GitHub; moving circuit traces are visual design,
+          not a claim about actual links between individual contributions.
+          """
+          from __future__ import annotations
+          
+          import argparse
+          from datetime import date
+          from html import escape
+          import json
+          import os
+          from pathlib import Path
+          import sys
+          import urllib.error
+          import urllib.request
+          
+          GRAPHQL = """query ($login: String!) {
+            user(login: $login) {
+              contributionsCollection {
+                contributionCalendar {
+                  weeks {
+                    contributionDays { date contributionCount contributionLevel }
+                  }
+                }
+              }
+            }
+          }"""
+          
+          WIDTH, HEIGHT = 1600, 460
+          GRID_X, GRID_Y = 86, 149
+          CELL, STEP, N_WEEKS = 19, 27, 53
+          PALETTE = {
+              "NONE": "#142130",
+              "FIRST_QUARTILE": "#15576b",
+              "SECOND_QUARTILE": "#167b98",
+              "THIRD_QUARTILE": "#22a6cb",
+              "FOURTH_QUARTILE": "#6be8f3",
+          }
+          
+          
+          def fetch_calendar(login: str, token: str) -> list[list[dict]]:
+              if not token:
+                  raise RuntimeError("GH_TOKEN is missing; add it as a GitHub Actions environment variable from secrets.GITHUB_TOKEN")
+              body = json.dumps({"query": GRAPHQL, "variables": {"login": login}}).encode()
+              req = urllib.request.Request(
+                  "https://api.github.com/graphql",
+                  data=body,
+                  headers={
+                      "Authorization": f"Bearer {token}",
+                      "Accept": "application/vnd.github+json",
+                      "Content-Type": "application/json",
+                      "User-Agent": "raulmermans-activity-signal/1.0",
+                  },
+                  method="POST",
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as response:
+                      payload = json.load(response)
+              except urllib.error.HTTPError as err:
+                  raise RuntimeError(f"GitHub GraphQL returned HTTP {err.code}: {err.read().decode(errors='replace')[:250]}") from err
+              if payload.get("errors"):
+                  raise RuntimeError("GitHub GraphQL error: " + json.dumps(payload["errors"])[:500])
+              try:
+                  return payload["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]
+              except (KeyError, TypeError) as err:
+                  raise RuntimeError("Unexpected GitHub contributionCalendar response; verify GitHub username and token") from err
+          
+          
+          def normalize_weeks(raw_weeks: list[dict]) -> list[list[dict]]:
+              """Maps GitHub's chronological week records to Sunday-first 7-day columns."""
+              result = []
+              for raw_week in raw_weeks[-N_WEEKS:]:
+                  days = [dict(date="", contributionCount=0, contributionLevel="NONE") for _ in range(7)]
+                  for day in raw_week.get("contributionDays", []):
+                      try:
+                          weekday = (date.fromisoformat(day["date"]).weekday() + 1) % 7
+                          level = day.get("contributionLevel", "NONE")
+                          if level not in PALETTE:
+                              level = "NONE"
+                          days[weekday] = {
+                              "date": day["date"],
+                              "contributionCount": max(0, int(day["contributionCount"])),
+                              "contributionLevel": level,
+                          }
+                      except (KeyError, ValueError, TypeError) as e:
+                          raise RuntimeError("Malformed date or count in GitHub response") from e
+                  result.append(days)
+              return ([[] for _ in range(N_WEEKS - len(result))] + result)[-N_WEEKS:]
+          
+          
+          def chosen_nodes(weeks: list[list[dict]]) -> list[tuple[int,int,int]]:
+              """Select graph points from actual nonzero contributions, never fictitious nodes."""
+              candidates = []
+              for col in range(N_WEEKS):
+                  for row in range(7):
+                      day = weeks[col][row] if len(weeks[col]) == 7 else None
+                      if day and day["contributionCount"] > 0:
+                          candidates.append((col, row, day["contributionCount"]))
+              chosen = []
+              for lo in range(0, N_WEEKS, 3):
+                  options = [p for p in candidates if lo <= p[0] < lo + 3]
+                  if options:
+                      chosen.append(max(options, key=lambda x: (x[2], -abs(x[1]-3))))
+              return chosen
+          
+          
+          def render(weeks: list[list[dict]], name: str) -> str:
+              name = escape(name.upper())
+              lines = [f'''<svg xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" height="{HEIGHT}" viewBox="0 0 {WIDTH} {HEIGHT}" role="img" aria-labelledby="title desc">
+          <title id="title">Activity Signal — {name}</title>
+          <desc id="desc">The last year of publicly visible GitHub contributions, generated daily from GitHub's API. Animated circuitry is decorative.</desc>
+          <defs>
+            <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#080f19"/><stop offset="1" stop-color="#040a12"/></linearGradient>
+            <linearGradient id="trace" x2="1" y2="0"><stop stop-color="#187eaa"/><stop offset="0.5" stop-color="#6de5f1"/><stop offset="1" stop-color="#508cff"/></linearGradient>
+            <linearGradient id="sweep" x1="0" x2="1"><stop stop-color="#37c6ef" stop-opacity="0"/><stop offset=".5" stop-color="#5bdff9" stop-opacity=".42"/><stop offset="1" stop-color="#37c6ef" stop-opacity="0"/></linearGradient>
+            <filter id="glow" x="-250%" y="-250%" width="600%" height="600%"><feGaussianBlur stdDeviation="4.0"/></filter>
+            <filter id="tiny-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.7"/></filter>
+            <style>
+              .label{{font:500 26px 'Segoe UI',Arial,sans-serif;letter-spacing:9px;fill:#eaf5fd}}
+              .name{{font:400 15px ui-monospace,Menlo,Consolas,monospace;letter-spacing:5px;fill:#8aaabc}}
+              .small{{font:400 13px ui-monospace,Menlo,Consolas,monospace;letter-spacing:4px;fill:#4e819e}}
+              .signal{{animation:flow 11s linear infinite;stroke-dasharray:12 110;}}
+              .node{{animation:pulse 7s ease-in-out infinite;}}
+              @keyframes flow{{to{{stroke-dashoffset:-350;}}}}
+              @keyframes pulse{{0%,100%{{opacity:.6}}50%{{opacity:1}}}}
+              @media (prefers-reduced-motion:reduce){{.signal,.node{{animation:none!important;}}}}
+            </style>
+          </defs>
+          <rect width="1600" height="460" fill="url(#bg)"/>
+          <path d="M32 32H1568V428H32Z" fill="none" stroke="#234a60" opacity=".65"/>
+          <path d="M32 67H68 M32 67V32 M1532 32H1568V67 M32 393V428H68 M1532 428H1568V393" fill="none" stroke="#39a6d4" stroke-width="1.4" opacity=".8"/>
+          <line x1="86" y1="108" x2="1514" y2="108" stroke="#19435b"/>
+          <rect x="86" y="67" width="3" height="30" fill="#2abce7"/>
+          <text x="110" y="92" class="label">ACTIVITY <tspan fill="#47c8f2">SIGNAL</tspan></text>
+          <text x="1514" y="91" text-anchor="end" class="name">{name}</text>
+          <path d="M63 137v197 M1537 137v197" stroke="#1b4963" stroke-dasharray="5 14" opacity=".7"/>
+          ''']
+              # Literal calendar tiles, one per day, including zeros and partial weeks.
+              for col in range(N_WEEKS):
+                  for row in range(7):
+                      day = weeks[col][row] if len(weeks[col]) == 7 else None
+                      level = day["contributionLevel"] if day else "NONE"
+                      count = day["contributionCount"] if day else 0
+                      # All tiles sit on a restrained night palette; active cells earn their light.
+                      fill = PALETTE.get(level, PALETTE["NONE"])
+                      if count == 0: fill = PALETTE["NONE"]
+                      opacity = ".52" if count == 0 else ".93"
+                      x,y = GRID_X+col*STEP, GRID_Y+row*STEP
+                      title = f'{escape(day["date"])}: {count} contributions' if day and day["date"] else 'Outside reported calendar'
+                      lines.append(f'<rect x="{x}" y="{y}" width="{CELL}" height="{CELL}" rx="3" fill="{fill}" opacity="{opacity}"><title>{title}</title></rect>')
+              nodes = chosen_nodes(weeks)
+              if len(nodes) >= 2:
+                  pts=[(GRID_X+col*STEP+CELL/2,GRID_Y+row*STEP+CELL/2) for col,row,_ in nodes]
+                  parts=[f'M{pts[0][0]:g},{pts[0][1]:g}']
+                  for (x0,y0),(x1,y1) in zip(pts,pts[1:]):
+                      mid=(x0+x1)/2
+                      parts.append(f'C{mid:g},{y0:g} {mid:g},{y1:g} {x1:g},{y1:g}')
+                  path=" ".join(parts)
+                  lines.append(f'<path d="{path}" fill="none" stroke="#276b93" stroke-width="6" opacity=".18" filter="url(#glow)"/>')
+                  lines.append(f'<path d="{path}" fill="none" stroke="url(#trace)" stroke-width="1.65" opacity=".75"/>')
+                  lines.append(f'<path d="{path}" fill="none" stroke="#ccf9ff" stroke-width="2.5" opacity=".85" class="signal"/>')
+                  for idx,(x,y) in enumerate(pts):
+                      if idx % 2 == 0:
+                          delay= -(idx%8)*.8
+                          lines.append(f'<circle cx="{x:g}" cy="{y:g}" r="8" fill="#48dff7" opacity=".4" filter="url(#tiny-glow)"/>')
+                          lines.append(f'<circle cx="{x:g}" cy="{y:g}" r="3" fill="#b4f7ff" class="node" style="animation-delay:{delay:.1f}s"/>')
+              # Low-key scanning beam. Geometry is independent from contribution data.
+              lines.append('''<rect x="-100" y="135" width="100" height="195" fill="url(#sweep)" opacity=".37">
+          <animate attributeName="x" from="-100" to="1600" dur="13s" repeatCount="indefinite" />
+          </rect>
+          <line x1="86" y1="368" x2="1514" y2="368" stroke="#173d52"/>
+          <text x="86" y="404" class="small">GITHUB / PUBLIC CONTRIBUTIONS</text>
+          <circle cx="1337" cy="398" r="3" fill="#6ee5f1" class="node"/>
+          <text x="1514" y="404" text-anchor="end" class="small">UPDATED DAILY</text>
+          </svg>''')
+              return "\n".join(lines)
+          
+          
+          def main() -> None:
+              parser=argparse.ArgumentParser(description=__doc__)
+              parser.add_argument("--login", default=os.environ.get("GITHUB_REPOSITORY_OWNER", "RaulMermans"))
+              parser.add_argument("--out", default="dist/activity-signal.svg")
+              parser.add_argument("--fixture", help="Local preview only: JSON weeks fixture; never used by the GitHub Action")
+              args=parser.parse_args()
+              raw=json.loads(Path(args.fixture).read_text()) if args.fixture else fetch_calendar(args.login,os.getenv("GH_TOKEN", ""))
+              weeks=normalize_weeks(raw)
+              output=Path(args.out)
+              output.parent.mkdir(parents=True,exist_ok=True)
+              output.write_text(render(weeks,args.login),encoding="utf-8")
+              count=sum(d.get("contributionCount",0) for week in weeks for d in week)
+              print(f"Wrote {output} ({output.stat().st_size:,} bytes) from GitHub contribution calendar; public contributions: {count}")
+          
+          
+          if __name__ == "__main__":
+              try: main()
+              except Exception as ex:
+                  print(f"ERROR: {ex}",file=sys.stderr)
+                  sys.exit(1)
+          PYTHON
+
+      - name: Publish the animated SVG
         uses: crazy-max/ghaction-github-pages@v4
         with:
-          target_branch: output
+          target_branch: activity-signal
           build_dir: dist
-          commit_message: 'chore: update contribution animation'
+          commit_message: 'chore: refresh contribution signal'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
