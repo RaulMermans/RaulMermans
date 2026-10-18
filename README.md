@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="./assets/hero.gif" alt="Raúl Mermans — AI Engineer. Intelligence, Engineered. An animated constellation of connected systems." width="100%" />
+  <img src="./hero.gif" alt="Raúl Mermans — AI Engineer. Intelligence, Engineered. An animated constellation of connected systems." width="100%" />
 
   <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&amp;weight=500&amp;size=17&amp;duration=3400&amp;pause=1100&amp;color=7CE6E4&amp;center=true&amp;vCenter=true&amp;width=950&amp;height=48&amp;lines=AI+ENGINEER+%2F%2F+INTELLIGENT+SYSTEMS%3BAGENT+INFRASTRUCTURE+%2F%2F+APPLIED+ML%3BFROM+MODELS+TO+OPERATIONAL+SYSTEMS" alt="AI Engineer, Agent Infrastructure, Applied ML" />
 
