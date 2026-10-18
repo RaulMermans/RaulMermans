@@ -88,11 +88,9 @@ Other experiments: **[DataBrief AI](https://github.com/RaulMermans/DataBrief-AI)
 </div>
 
 
-### Activity Signal
 
 ![Activity Signal — GitHub contributions](https://raw.githubusercontent.com/RaulMermans/RaulMermans/activity-signal/activity-signal.svg)
 
-<sub>Updated automatically from my GitHub contribution history.</sub>
 
 
 ---
