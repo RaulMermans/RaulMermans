@@ -28,276 +28,443 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Build activity from GitHub data
+      - name: Generate Activity Signal SVG
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
           python - <<'PYTHON'
-          #!/usr/bin/env python3
-          """Generate a GitHub contribution-driven, self-contained animated SVG.
-
-          No JS, external assets or runtime services in the resulting SVG.
-          The calendar and weekly volume plot come exclusively from GitHub data.
-          The space/city art and ornamental signal sweeps are purely decorative.
-          """
           from __future__ import annotations
 
-          import argparse
-          from datetime import date
-          from html import escape
           import json
           import math
           import os
-          from pathlib import Path
-          import random
           import sys
-          import urllib.error
           import urllib.request
+          from datetime import date
+          from html import escape
+          from pathlib import Path
 
-          LOGIN_DEFAULT = 'RaulMermans'
-          W, H = 1600, 600
-          GRID_X, GRID_Y, DX, DY, BOX = 125, 253, 25, 27, 18
-          LOOP = 18.0
-          LEVEL_NAMES = ['NONE', 'FIRST_QUARTILE', 'SECOND_QUARTILE', 'THIRD_QUARTILE', 'FOURTH_QUARTILE']
-          COLORS = ['#0b1b2c', '#1a4165', '#237ab7', '#44b7ee', '#9aefff']
-          GRAPHQL = '''query ($login: String!) {
+          GRAPHQL = """
+          query($login: String!) {
             user(login: $login) {
               contributionsCollection {
                 contributionCalendar {
-                  weeks { contributionDays { date contributionCount contributionLevel } }
+                  totalContributions
+                  weeks {
+                    contributionDays {
+                      date
+                      contributionCount
+                      contributionLevel
+                    }
+                  }
                 }
               }
             }
-          }'''
+          }
+          """
 
+          WIDTH = 1600
+          HEIGHT = 560
 
-          def github_weeks(login: str) -> list[dict]:
-              token = os.environ.get('GH_TOKEN') or os.environ.get('GITHUB_TOKEN')
+          GRID_X = 140
+          GRID_Y = 182
+          CELL = 21
+          GAP = 10
+          STEP_X = CELL + GAP
+          STEP_Y = CELL + GAP
+          N_WEEKS = 53
+
+          LOGIN_DEFAULT = "RaulMermans"
+
+          PALETTE = {
+              "NONE": "#0d1d30",
+              "FIRST_QUARTILE": "#16415b",
+              "SECOND_QUARTILE": "#1d6d8d",
+              "THIRD_QUARTILE": "#27a8d1",
+              "FOURTH_QUARTILE": "#8af3ff",
+          }
+
+          def github_weeks(login: str):
+              token = os.getenv("GH_TOKEN", "")
               if not token:
-                  raise RuntimeError('GH_TOKEN missing: supply secrets.GITHUB_TOKEN in the workflow')
-              body = json.dumps({'query': GRAPHQL, 'variables': {'login': login}}).encode()
-              request = urllib.request.Request('https://api.github.com/graphql', data=body,
-                  headers={'Authorization':f'Bearer {token}', 'Accept':'application/vnd.github+json',
-                           'Content-Type':'application/json', 'User-Agent':'readme-activity-signal/2.0'},
-                  method='POST')
-              try:
-                  with urllib.request.urlopen(request, timeout=30) as response:
-                      result=json.load(response)
-              except urllib.error.HTTPError as err:
-                  raise RuntimeError(f'GitHub API HTTP {err.code}: {err.read().decode(errors="replace")[:220]}') from err
-              if result.get('errors'):
-                  raise RuntimeError(f'GitHub API error: {str(result["errors"])[:300]}')
-              try:
-                  return result['data']['user']['contributionsCollection']['contributionCalendar']['weeks']
-              except (KeyError, TypeError) as err:
-                  raise RuntimeError('GitHub did not return a contribution calendar') from err
+                  raise RuntimeError("Missing GH_TOKEN")
+              body = json.dumps({
+                  "query": GRAPHQL,
+                  "variables": {"login": login}
+              }).encode("utf-8")
+              req = urllib.request.Request(
+                  "https://api.github.com/graphql",
+                  data=body,
+                  headers={
+                      "Authorization": f"Bearer {token}",
+                      "Accept": "application/vnd.github+json",
+                      "Content-Type": "application/json",
+                      "User-Agent": "activity-signal-generator"
+                  },
+                  method="POST"
+              )
+              with urllib.request.urlopen(req, timeout=30) as resp:
+                  payload = json.load(resp)
 
+              if payload.get("errors"):
+                  raise RuntimeError(f"GitHub GraphQL error: {payload['errors']}")
 
-          def normalize_weeks(raw: list[dict]) -> list[list[dict]]:
-              weeks=[]
-              for week in raw[-53:]:
-                  days=[{'date':'','contributionCount':0,'contributionLevel':'NONE'} for _ in range(7)]
-                  for day in week.get('contributionDays',[]):
-                      try:
-                          ix=(date.fromisoformat(day['date']).weekday()+1)%7
-                          count=max(0,int(day['contributionCount']))
-                          level=day.get('contributionLevel','NONE')
-                          if level not in LEVEL_NAMES:
-                              raise ValueError('unknown level')
-                          days[ix]={'date':day['date'],'contributionCount':count,'contributionLevel':level}
-                      except (KeyError,TypeError,ValueError) as err:
-                          raise ValueError('Bad date, count or level in GitHub calendar') from err
+              cal = payload["data"]["user"]["contributionsCollection"]["contributionCalendar"]
+              return cal["weeks"], cal["totalContributions"]
+
+          def normalize_weeks(raw_weeks):
+              weeks = []
+              for raw_week in raw_weeks[-N_WEEKS:]:
+                  days = [dict(date="", contributionCount=0, contributionLevel="NONE") for _ in range(7)]
+                  for d in raw_week.get("contributionDays", []):
+                      weekday = (date.fromisoformat(d["date"]).weekday() + 1) % 7  # sunday-first
+                      level = d.get("contributionLevel", "NONE")
+                      if level not in PALETTE:
+                          level = "NONE"
+                      days[weekday] = {
+                          "date": d["date"],
+                          "contributionCount": int(d.get("contributionCount", 0)),
+                          "contributionLevel": level,
+                      }
                   weeks.append(days)
-              if not weeks:
-                  raise ValueError('GitHub calendar returned no weeks')
-              return ([[] for _ in range(53-len(weeks))] + weeks)[-53:]
 
+              if len(weeks) < N_WEEKS:
+                  pad = [[dict(date="", contributionCount=0, contributionLevel="NONE") for _ in range(7)] for _ in range(N_WEEKS - len(weeks))]
+                  weeks = pad + weeks
 
-          def animation_times(ix:int) -> tuple[list[str],list[str]]:
-              # The first contributions emerge left-to-right; they disappear right-to-left.
-              appear=1.25+ix*.085
-              hide=11.25+(52-ix)*.077
-              ts=[0, max(0,appear-.06), appear+.47, hide, hide+.49, LOOP]
-              times=[f'{t/LOOP:.5f}' for t in ts]
-              return times, [f'{t:.2f}' for t in ts]
+              return weeks[-N_WEEKS:]
 
+          def week_totals(weeks):
+              return [sum(day["contributionCount"] for day in week) for week in weeks]
 
-          def svg(weeks:list[list[dict]],login:str) -> str:
-              login_escaped=escape(login)
-              name='RAÚL MERMANS' if login.lower()=='raulmermans' else login_escaped.upper()
-              counts=[sum(day.get('contributionCount',0) for day in week) for week in weeks]
-              total=sum(counts)
-              valid_dates=[day['date'] for week in weeks for day in week if day.get('date')]
-              start,end=min(valid_dates),max(valid_dates)
-              lines=[f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-labelledby="title description">
-          <title id="title">Activity Signal — {name}</title>
-          <desc id="description">Animated reveal and reverse-reveal of {total} GitHub public contributions from {start} to {end}. Height and color represent actual GitHub contribution activity. Week volume below is data-derived; celestial artwork is decorative.</desc>
-          <defs>
-            <linearGradient id="night" x2="0.15" y2="1"><stop stop-color="#040a14"/><stop offset=".52" stop-color="#071526"/><stop offset="1" stop-color="#030811"/></linearGradient>
-            <radialGradient id="moon"><stop stop-color="#367dc2" stop-opacity=".17"/><stop offset=".65" stop-color="#19446f" stop-opacity=".12"/><stop offset="1" stop-color="#040a14" stop-opacity="0"/></radialGradient>
-            <radialGradient id="planet"><stop stop-color="#214b78" stop-opacity=".48"/><stop offset=".48" stop-color="#173c65" stop-opacity=".28"/><stop offset=".85" stop-color="#0c2542" stop-opacity=".36"/><stop offset="1" stop-color="#5aafff" stop-opacity=".25"/></radialGradient>
-            <linearGradient id="nebula"><stop stop-color="#125b9e" stop-opacity="0"/><stop offset=".55" stop-color="#256cae" stop-opacity=".12"/><stop offset="1" stop-color="#5a92d9" stop-opacity="0"/></linearGradient>
-            <radialGradient id="aura"><stop stop-color="#5ac8fb" stop-opacity=".26"/><stop offset="1" stop-color="#2777d5" stop-opacity="0"/></radialGradient>
-            <linearGradient id="sweep"><stop stop-color="#5ccafa" stop-opacity="0"/><stop offset=".5" stop-color="#9eeaff" stop-opacity=".34"/><stop offset="1" stop-color="#5ccafa" stop-opacity="0"/></linearGradient>
-            <linearGradient id="line" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#315da3"/><stop offset=".42" stop-color="#38c9ee"/><stop offset=".75" stop-color="#9e8dff"/><stop offset="1" stop-color="#66e3fa"/></linearGradient>
-            <filter id="blur"><feGaussianBlur stdDeviation="16"/></filter>
-            <filter id="atmosphere"><feGaussianBlur stdDeviation="5"/></filter>
-            <filter id="nodeglow"><feGaussianBlur stdDeviation="4"/></filter>
-            <clipPath id="frame"><rect x="60" y="48" width="1480" height="506" rx="2"/></clipPath>
-            <style>
-              .eyebrow {{font: 500 17px 'SFMono-Regular',Consolas,monospace; letter-spacing:4px; fill:#a8bccc}}
-              .label {{font:600 43px 'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:3px;fill:#f5f7ff}}
-              .small {{font:400 14px 'SFMono-Regular',Consolas,monospace;letter-spacing:2.6px;fill:#7397b4}}
-              .numeric {{font:500 24px 'SFMono-Regular',Consolas,monospace;letter-spacing:2px;fill:#d9f7ff}}
-              @media (prefers-reduced-motion: reduce) {{ .week {{opacity:1!important;transform:none!important}} .ambient {{opacity:0!important}} .volume-trace {{stroke-dasharray:none!important;stroke-dashoffset:0!important}} }}
-            </style>
-          </defs>
-          <rect width="{W}" height="{H}" fill="url(#night)"/>
-          <rect x="875" y="-65" width="650" height="450" fill="url(#moon)"/>
-          <circle cx="1210" cy="134" r="200" fill="url(#moon)"/>
-          <circle cx="1210" cy="145" r="125" fill="none" stroke="#326388" stroke-width=".6" opacity=".33"/>
-          <circle cx="1210" cy="145" r="118" fill="none" stroke="#2a4b70" opacity=".16"/>
-          <ellipse cx="1210" cy="145" rx="284" ry="56" fill="none" stroke="#5daff3" stroke-width=".8" opacity=".25" transform="rotate(-14 1210 145)"/>
-          <ellipse cx="1210" cy="145" rx="237" ry="78" fill="none" stroke="#386ba7" stroke-width=".65" opacity=".22" transform="rotate(18 1210 145)"/>
-          <path d="M906 192 Q1240 9 1548 140" fill="none" stroke="#538bc7" stroke-width=".7" opacity=".27" stroke-dasharray="3 8"/>
-          ''']
-              rng=random.Random(2451)
-              for k in range(135):
-                  x=rng.randrange(12,W-12);y=rng.randrange(3, 190)
-                  r=rng.choice([.5,.7,1,1.1]); op=rng.uniform(.13,.55)
-                  lines.append(f'<circle cx="{x}" cy="{y}" r="{r}" fill="#bedffa" opacity="{op:.2f}"/>')
-              # Architecture silhouette, intentionally not fake data.
-              buildings=[]
-              rng=random.Random(67)
-              for x in range(0,W,21):
-                  hh=rng.randrange(12,66)
-                  buildings.append(f'{x},{207-hh} {x+19},{207-hh} {x+19},207')
-              lines.append('<path d="M0 207 '+ ' '.join('L'+b.replace(' ',' L') for b in buildings)+' L1600 207Z" fill="#0d2540" opacity=".12"/>')
-              lines.extend(['''<path d="M65 53H1535 M65 53V560H1535" stroke="#244b66" stroke-width="1.1" opacity=".64" fill="none"/>
-          <path d="M65 83V53H96 M1504 53H1535V83 M65 530V560H96 M1504 560H1535V530" stroke="#70beeb" stroke-width="1.1" opacity=".7" fill="none"/>
-          <path d="M104 117H1496" stroke="#2d506e" stroke-width=".7"/>
-          <text x="105" y="91" class="eyebrow">RAÚL MERMANS  /  AI ENGINEER</text>
-          <text x="105" y="168" class="label">ACTIVITY <tspan fill="#68c9f9">SIGNAL</tspan></text>
-          <text x="1490" y="164" text-anchor="end" class="small">PUBLIC CONTRIBUTION HISTORY</text>
-          <text x="105" y="205" class="small">VISIBLE HISTORY  /  REBUILT DAILY</text>
-          '''])
-              # Month labels strictly from actual calendar dates.
-              seen=set()
-              for col, week in enumerate(weeks):
-                  candidates=[d for d in week if d.get('date')]
-                  if not candidates: continue
-                  d0=date.fromisoformat(candidates[0]['date'])
-                  month=(d0.year,d0.month)
-                  if month not in seen:
-                      seen.add(month)
-                      if col > 1:
-                          x=GRID_X+col*DX
-                          lines.append(f'<text x="{x}" y="236" class="small" font-size="12">{d0.strftime("%b").upper()}</text>')
-              # Empty-week scaffolding remains dark until the reveal animation; actual data appears only with each week.
-              lines.append('<g clip-path="url(#frame)">')
-              for col,week in enumerate(weeks):
-                  times,_=animation_times(col)
-                  # 1.2..6.1s build, 11.2..15.9s disassemble. 18s total.
-                  key=';'.join(times)
-                  lines.append(f'<g class="week" opacity="0" id="week-{col}">')
-                  lines.append(f'<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="{key}" dur="18s" repeatCount="indefinite"/>')
-                  lines.append(f'<animateTransform attributeName="transform" type="translate" values="0 20;0 20;0 0;0 0;0 -16;0 20" keyTimes="{key}" dur="18s" repeatCount="indefinite"/>')
+          def date_range(weeks):
+              first = None
+              last = None
+              for w in weeks:
+                  for d in w:
+                      if d["date"]:
+                          if first is None:
+                              first = d["date"]
+                          last = d["date"]
+              return first or "", last or ""
+
+          def month_labels(weeks):
+              out = []
+              seen = set()
+              month_names = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"]
+              for i, week in enumerate(weeks):
+                  for d in week:
+                      if d["date"]:
+                          dt = date.fromisoformat(d["date"])
+                          key = (dt.year, dt.month)
+                          if key not in seen:
+                              seen.add(key)
+                              out.append((i, month_names[dt.month - 1]))
+                          break
+              return out
+
+          def cluster_points(weeks):
+              totals = week_totals(weeks)
+              points = []
+              segments = 6
+              seg_size = max(1, N_WEEKS // segments)
+              for s in range(segments):
+                  lo = s * seg_size
+                  hi = N_WEEKS if s == segments - 1 else min(N_WEEKS, (s + 1) * seg_size)
+                  best_col = None
+                  best_total = -1
+                  best_row = 3
+                  for col in range(lo, hi):
+                      total = totals[col]
+                      if total <= 0:
+                          continue
+                      best_day_row = 3
+                      best_day_val = -1
+                      for row in range(7):
+                          val = weeks[col][row]["contributionCount"]
+                          if val > best_day_val:
+                              best_day_val = val
+                              best_day_row = row
+                      if total > best_total:
+                          best_total = total
+                          best_col = col
+                          best_row = best_day_row
+                  if best_col is not None:
+                      points.append((best_col, best_row, best_total))
+              return points
+
+          def build_arc_path(points):
+              if len(points) < 2:
+                  return ""
+              coords = []
+              for col, row, _ in points:
+                  x = GRID_X + col * STEP_X + CELL / 2
+                  y = GRID_Y + row * STEP_Y + CELL / 2
+                  coords.append((x, y))
+
+              parts = [f"M {coords[0][0]:.1f} {coords[0][1]:.1f}"]
+              for (x0, y0), (x1, y1) in zip(coords, coords[1:]):
+                  mx = (x0 + x1) / 2
+                  cy = min(y0, y1) - 90
+                  parts.append(f"Q {mx:.1f} {cy:.1f} {x1:.1f} {y1:.1f}")
+              return " ".join(parts), coords
+
+          def tile_animation_times(col):
+              # reveal left -> right, then hide right -> left
+              reveal_start = 0.09 + col * 0.0078
+              reveal_end = reveal_start + 0.035
+              hide_start = 0.70 + (N_WEEKS - 1 - col) * 0.0054
+              hide_end = hide_start + 0.035
+              hide_end = min(hide_end, 0.97)
+              return reveal_start, reveal_end, hide_start, hide_end
+
+          def tile_opacity_for_count(count):
+              if count <= 0:
+                  return 0.22
+              if count < 3:
+                  return 0.62
+              if count < 10:
+                  return 0.76
+              return 0.95
+
+          def svg(weeks, login, total_contributions):
+              login_upper = escape(login.upper())
+              first_date, last_date = date_range(weeks)
+              months = month_labels(weeks)
+              totals = week_totals(weeks)
+              max_total = max(max(totals), 1)
+              path_data, arc_coords = build_arc_path(cluster_points(weeks))
+
+              lines = []
+              add = lines.append
+
+              add(f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {WIDTH} {HEIGHT}" width="{WIDTH}" height="{HEIGHT}" role="img" aria-labelledby="title desc">
+<title id="title">Activity Signal — {login_upper}</title>
+<desc id="desc">Animated GitHub contribution signal generated from real public contribution history.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#030911"/>
+    <stop offset="55%" stop-color="#06111f"/>
+    <stop offset="100%" stop-color="#02070f"/>
+  </linearGradient>
+
+  <radialGradient id="glowPlanet" cx="78%" cy="28%" r="34%">
+    <stop offset="0%" stop-color="#5cbcff" stop-opacity="0.18"/>
+    <stop offset="45%" stop-color="#2d74be" stop-opacity="0.10"/>
+    <stop offset="100%" stop-color="#07111d" stop-opacity="0"/>
+  </radialGradient>
+
+  <linearGradient id="frameGlow" x1="0" x2="1">
+    <stop offset="0%" stop-color="#1e84d6"/>
+    <stop offset="50%" stop-color="#62ddff"/>
+    <stop offset="100%" stop-color="#1e84d6"/>
+  </linearGradient>
+
+  <linearGradient id="sweep" x1="0" x2="1">
+    <stop offset="0%" stop-color="#4ad7ff" stop-opacity="0"/>
+    <stop offset="50%" stop-color="#8af3ff" stop-opacity="0.28"/>
+    <stop offset="100%" stop-color="#4ad7ff" stop-opacity="0"/>
+  </linearGradient>
+
+  <filter id="softGlow" x="-120%" y="-120%" width="340%" height="340%">
+    <feGaussianBlur stdDeviation="6"/>
+  </filter>
+
+  <filter id="tinyGlow" x="-200%" y="-200%" width="500%" height="500%">
+    <feGaussianBlur stdDeviation="2.2"/>
+  </filter>
+
+  <style>
+    .title {{
+      font: 700 24px Inter, Arial, sans-serif;
+      letter-spacing: 6px;
+      fill: #f2f7ff;
+    }}
+    .title-accent {{
+      fill: #4ecaff;
+    }}
+    .kicker {{
+      font: 500 11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      letter-spacing: 4px;
+      fill: #7fa3bc;
+      text-transform: uppercase;
+    }}
+    .small {{
+      font: 500 10px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      letter-spacing: 3.5px;
+      fill: #6488a3;
+      text-transform: uppercase;
+    }}
+    .month {{
+      font: 500 10px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      letter-spacing: 2px;
+      fill: #93b0c6;
+      text-transform: uppercase;
+    }}
+    .tile-on {{
+      animation: tilePulse 18s linear infinite;
+    }}
+    .node {{
+      animation: nodePulse 4.5s ease-in-out infinite;
+    }}
+    .scan {{
+      animation: sweepMove 18s linear infinite;
+    }}
+    .arc-shimmer {{
+      stroke-dasharray: 16 22;
+      animation: shimmer 7s linear infinite;
+    }}
+    .star {{
+      animation: starTwinkle 5s ease-in-out infinite;
+    }}
+    @keyframes shimmer {{
+      from {{ stroke-dashoffset: 0; }}
+      to {{ stroke-dashoffset: -220; }}
+    }}
+    @keyframes nodePulse {{
+      0%, 100% {{ opacity: .45; transform: scale(1); }}
+      50% {{ opacity: 1; transform: scale(1.25); }}
+    }}
+    @keyframes starTwinkle {{
+      0%, 100% {{ opacity: .15; }}
+      50% {{ opacity: .75; }}
+    }}
+    @keyframes sweepMove {{
+      0%, 100% {{ transform: translateX(-90px); opacity: 0; }}
+      18% {{ opacity: .22; }}
+      50% {{ opacity: .34; }}
+      82% {{ opacity: .22; }}
+      100% {{ transform: translateX(1430px); opacity: 0; }}
+    }}
+    @keyframes tilePulse {{
+      0%, 100% {{ filter: none; }}
+      50% {{ filter: url(#tinyGlow); }}
+    }}
+    @media (prefers-reduced-motion: reduce) {{
+      .scan, .arc-shimmer, .node, .tile-on, .star {{ animation: none !important; }}
+    }}
+  </style>
+</defs>
+
+<rect width="{WIDTH}" height="{HEIGHT}" fill="url(#bg)"/>
+<rect width="{WIDTH}" height="{HEIGHT}" fill="url(#glowPlanet)"/>
+''')
+
+              # stars
+              stars = [
+                  (210, 52, 1.2, 0.35, "0s"), (318, 80, 1.4, 0.22, "1s"), (447, 38, 1.0, 0.28, "2s"),
+                  (590, 66, 1.6, 0.25, "1.5s"), (712, 55, 1.1, 0.22, "0.8s"), (840, 40, 1.3, 0.32, "1.2s"),
+                  (1020, 72, 1.4, 0.20, "1.9s"), (1170, 50, 1.0, 0.22, "0.4s"), (1320, 44, 1.2, 0.24, "1.3s")
+              ]
+              for x, y, r, op, delay in stars:
+                  add(f'<circle class="star" cx="{x}" cy="{y}" r="{r}" fill="#bfeaff" opacity="{op}" style="animation-delay:{delay}"/>')
+
+              # orbital background arcs
+              add('''
+<path d="M 1020 80 Q 1245 -5 1440 72 Q 1518 104 1490 155 Q 1450 230 1270 235 Q 1120 238 1045 198 Q 965 158 1010 112 Q 1040 84 1100 76" fill="none" stroke="#173554" stroke-width="1.2" opacity=".55"/>
+<path d="M 1075 42 Q 1270 110 1492 92" fill="none" stroke="#1f4c75" stroke-width="1.1" opacity=".36" stroke-dasharray="4 8"/>
+<path d="M 1128 27 Q 1272 210 1387 270" fill="none" stroke="#143551" stroke-width="1" opacity=".26"/>
+''')
+
+              # frame
+              add(f'''
+<path d="M110 70 H1490 V470 H110 Z" fill="none" stroke="#173957" stroke-width="1.2" opacity=".9"/>
+<path d="M110 104 H1490" stroke="#16364f" stroke-width="1"/>
+<path d="M110 70 H152 V105" stroke="url(#frameGlow)" stroke-width="1.4" fill="none"/>
+<path d="M1490 70 H1448 V105" stroke="url(#frameGlow)" stroke-width="1.4" fill="none"/>
+<path d="M110 470 H152 V435" stroke="#2a92d8" stroke-width="1.3" fill="none" opacity=".85"/>
+<path d="M1490 470 H1448 V435" stroke="#2a92d8" stroke-width="1.3" fill="none" opacity=".85"/>
+''')
+
+              # header text
+              add(f'''
+<text x="150" y="122" class="title">ACTIVITY <tspan class="title-accent">SIGNAL</tspan></text>
+<text x="150" y="150" class="kicker">public contribution history</text>
+
+<text x="1415" y="123" text-anchor="end" class="kicker">{login_upper} / AI ENGINEER</text>
+<text x="1415" y="150" text-anchor="end" class="small">generated from GitHub data</text>
+''')
+
+              # month labels
+              for col, label in months:
+                  x = GRID_X + col * STEP_X
+                  add(f'<text x="{x}" y="176" class="month">{label}</text>')
+
+              # reveal sweep
+              add(f'''
+<rect x="{GRID_X - 44}" y="{GRID_Y - 18}" width="95" height="260" fill="url(#sweep)" class="scan"/>
+''')
+
+              # contribution tiles
+              for col in range(N_WEEKS):
                   for row in range(7):
-                      day=week[row] if len(week)==7 else {'contributionCount':0,'contributionLevel':'NONE','date':''}
-                      count=day['contributionCount']; level=LEVEL_NAMES.index(day['contributionLevel']) if count else 0
-                      x=GRID_X+col*DX; y=GRID_Y+row*DY
-                      fill=COLORS[level]
-                      title=f'{day["date"]}: {count} public contributions' if day.get('date') else 'Outside calendar'
-                      lines.append(f'<g><title>{escape(title)}</title><rect x="{x}" y="{y}" width="{BOX}" height="{BOX}" rx="2.6" fill="#102239" stroke="#1b344b" stroke-width=".7"/>')
-                      if level:
-                          height=3.4+level*2.65  # relative intensity, not a literal height=count mapping
-                          top=y+BOX-height
-                          lines.append(f'<rect x="{x+.4:g}" y="{top:.1f}" width="{BOX-1}" height="{height:.1f}" rx="1.6" fill="{fill}" opacity=".85"/>')
-                          lines.append(f'<path d="M{x+.5:g},{top+2:.1f} l3.2,-3.2 h{BOX-5} l-3.2,3.2Z" fill="#a6f3ff" opacity="{.16+level*.105:.2f}"/>')
-                          if level>=3:
-                              lines.append(f'<path d="M{x+2},{top+3:.1f}v{height-5:.1f}" stroke="#b6f3ff" stroke-width=".7" opacity=".32"/>')
-                      lines.append('</g>')
-                  lines.append('</g>')
-              lines.append('</g>')
-              # A luminous trace touches the strongest real activity day in successive windows.
-              # The connections themselves are stylized; they do not represent relationships.
-              featured=[]
-              for a in range(0,53,4):
-                  candidates=[(weeks[c][r]['contributionCount'],c,r) for c in range(a,min(53,a+4)) for r in range(7)
-                              if len(weeks[c])==7 and weeks[c][r]['contributionCount']>0]
-                  if candidates:
-                      count,col,row=max(candidates)
-                      featured.append((GRID_X+col*DX+BOX/2,GRID_Y+row*DY+BOX/2))
-              if len(featured)>1:
-                  seg=[f'M{featured[0][0]:g},{featured[0][1]:g}']
-                  for (x0,y0),(x1,y1) in zip(featured,featured[1:]):
-                      mid=(x0+x1)/2
-                      seg.append(f'C{mid:g},{y0:g} {mid:g},{y1:g} {x1:g},{y1:g}')
-                  trace=' '.join(seg)
-                  lines.append(f'<path d="{trace}" stroke="#54bfff" stroke-width="9" opacity=".19" fill="none" filter="url(#atmosphere)"/>')
-                  lines.append(f'<path d="{trace}" stroke="#255578" stroke-width="1.1" opacity=".38" fill="none"/>')
-                  lines.append(f'<path class="ambient" d="{trace}" stroke="url(#line)" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-dasharray="2600" stroke-dashoffset="2600">'
-                               '<animate attributeName="stroke-dashoffset" values="2600;2600;0;0;-2600;-2600" keyTimes="0;.31;.46;.61;.79;1" dur="18s" repeatCount="indefinite"/></path>')
-                  for idx,(x,y) in enumerate(featured):
-                      lines.append(f'<g class="ambient" opacity="0"><circle cx="{x:g}" cy="{y:g}" r="8" stroke="#6eddf9" stroke-width="1" fill="#5fb5f5" fill-opacity=".09"/>'
-                                   f'<circle cx="{x:g}" cy="{y:g}" r="2.4" fill="#d4f9ff"/>'
-                                   f'<animate attributeName="opacity" values="0;0;.85;.8;0;0" keyTimes="0;.36;.47;.62;.82;1" dur="18s" repeatCount="indefinite"/></g>')
-              # Momentary scan at peak scene; explicitly decorative, not a data line.
-              lines.append('''<g class="ambient" opacity="0"><rect x="95" y="248" width="58" height="194" fill="url(#sweep)" opacity=".6"/>
-              <path d="M120 245V440" stroke="#8eeaff" stroke-width="1.0" opacity=".25"/>
-              <animate attributeName="opacity" values="0;0;.9;.9;0;0" keyTimes="0;.31;.35;.53;.57;1" dur="18s" repeatCount="indefinite"/>
-              <animateTransform attributeName="transform" type="translate" values="0 0;0 0;1310 0;1310 0" keyTimes="0;.31;.57;1" dur="18s" repeatCount="indefinite"/></g>''')
-              # A few small light points attached to real active dates (never invented contributions).
-              nodes=[]
-              for lo in range(1,51,7):
-                  options=[(weeks[c][r]['contributionCount'],c,r) for c in range(lo,min(53,lo+7)) for r in range(7) if len(weeks[c])==7 and weeks[c][r]['contributionCount']>0]
-                  if options:
-                      _,c,r=max(options)
-                      nodes.append((GRID_X+c*DX+9, GRID_Y+r*DY+9))
-              for i,(cx,cy) in enumerate(nodes):
-                  lines.append(f'''<g class="ambient" opacity="0"><circle cx="{cx}" cy="{cy}" r="19" fill="url(#aura)"/><circle cx="{cx}" cy="{cy}" r="3.6" fill="#c8fbff"/>
-                  <animate attributeName="opacity" values="0;0;.9;.20;0;0" keyTimes="0;.33;.42;.58;.74;1" dur="18s" begin="{i*.13:.2f}s" repeatCount="indefinite"/></g>''')
-              # Real derived weekly volume in restrained dedicated graph strip.
-              plot_y=510
-              mx=max(counts) or 1
-              coords=[]
-              for col,vol in enumerate(counts):
-                  xx=GRID_X+col*DX+BOX/2
-                  h=math.log1p(vol)/math.log1p(mx)*38
-                  coords.append((xx,plot_y-h))
-              p=' '.join(f'{"M" if i==0 else "L"}{x:.1f},{y:.1f}' for i,(x,y) in enumerate(coords))
-              lines.append(f'''<line x1="{GRID_X}" x2="{GRID_X+52*DX+BOX}" y1="{plot_y}" y2="{plot_y}" stroke="#335373" opacity=".5"/>
-          <text x="{GRID_X}" y="464" class="small">WEEKLY VOLUME</text>
-          <path d="{p}" fill="none" stroke="#256181" opacity=".46" stroke-width="1.1"/>
-          <path class="volume-trace" d="{p}" fill="none" stroke="url(#line)" stroke-width="2.2" stroke-dasharray="3500" stroke-dashoffset="3500">
-          <animate attributeName="stroke-dashoffset" values="3500;3500;0;0;-3500;-3500" keyTimes="0;.27;.42;.64;.87;1" dur="18s" repeatCount="indefinite"/></path>
-          <text x="105" y="542" class="small">{escape(start)}  —  {escape(end)}</text>
-          <text x="1492" y="542" text-anchor="end" class="small">{total:,} PUBLIC CONTRIBUTIONS</text>
-          <path d="M104 566H1495" stroke="#1b394e" stroke-width=".7"/>
-          <text x="105" y="587" class="small" font-size="11">GITHUB / {escape(login.upper())}</text>
-          <text x="1492" y="587" text-anchor="end" class="small" font-size="11">GENERATED FROM GITHUB DATA  •  DAILY SYNC</text>''')
-              lines.append('</svg>')
-              return '\n'.join(lines)
+                      day = weeks[col][row]
+                      count = day["contributionCount"]
+                      level = day["contributionLevel"]
+                      fill = PALETTE[level] if count > 0 else PALETTE["NONE"]
+                      x = GRID_X + col * STEP_X
+                      y = GRID_Y + row * STEP_Y
+                      target_opacity = tile_opacity_for_count(count)
+                      reveal_start, reveal_end, hide_start, hide_end = tile_animation_times(col)
+                      title = f'{escape(day["date"])}: {count} contributions' if day["date"] else 'No visible contribution data'
 
+                      add(f'<rect x="{x}" y="{y}" width="{CELL}" height="{CELL}" rx="4" fill="{fill}" opacity="0">')
+                      add(f'<title>{title}</title>')
+                      add(
+                          f'<animate attributeName="opacity" dur="18s" repeatCount="indefinite" '
+                          f'values="0;0;{target_opacity};{target_opacity};0;0" '
+                          f'keyTimes="0;{reveal_start:.4f};{reveal_end:.4f};{hide_start:.4f};{hide_end:.4f};1" />'
+                      )
+                      add('</rect>')
 
-          def main()->None:
-              parser=argparse.ArgumentParser()
-              parser.add_argument('--login',default=os.environ.get('GITHUB_REPOSITORY_OWNER',LOGIN_DEFAULT))
-              parser.add_argument('--fixture',type=Path,help='Offline preview fixture only; ignored in GitHub Actions')
-              parser.add_argument('--out',type=Path,default=Path('dist/activity-signal.svg'))
-              args=parser.parse_args()
-              raw=json.loads(args.fixture.read_text()) if args.fixture else github_weeks(args.login)
-              weeks=normalize_weeks(raw)
-              out=svg(weeks,args.login)
-              args.out.parent.mkdir(parents=True,exist_ok=True)
-              args.out.write_text(out,encoding='utf-8')
-              print(f'Generated {args.out} ({args.out.stat().st_size:,} bytes). Total public contributions: {sum(day.get("contributionCount",0) for week in weeks for day in week)}.')
+                      # subtle glow for active tiles
+                      if count > 0:
+                          add(f'<rect class="tile-on" x="{x}" y="{y}" width="{CELL}" height="{CELL}" rx="4" fill="{fill}" opacity="0" filter="url(#tinyGlow)">')
+                          add(
+                              f'<animate attributeName="opacity" dur="18s" repeatCount="indefinite" '
+                              f'values="0;0;0.18;0.18;0;0" '
+                              f'keyTimes="0;{reveal_start:.4f};{reveal_end:.4f};{hide_start:.4f};{hide_end:.4f};1" />'
+                          )
+                          add('</rect>')
 
-          if __name__=='__main__':
-              try:main()
+              # cluster arcs instead of middle wire
+              if path_data:
+                  add(f'<path d="{path_data}" fill="none" stroke="#1d5e8b" stroke-width="8" opacity=".10" filter="url(#softGlow)"/>')
+                  add(f'<path d="{path_data}" fill="none" stroke="#61d9ff" stroke-width="1.8" opacity=".65" class="arc-shimmer"/>')
+                  add(f'<path d="{path_data}" fill="none" stroke="#9af2ff" stroke-width="0.8" opacity=".92"/>')
+
+                  for i, (x, y) in enumerate(arc_coords):
+                      delay = f"{(i * 0.45):.2f}s"
+                      add(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="10" fill="#55dfff" opacity=".16" filter="url(#softGlow)"/>')
+                      add(f'<circle class="node" cx="{x:.1f}" cy="{y:.1f}" r="4.4" fill="#d7fbff" opacity=".85" style="animation-delay:{delay}"/>')
+
+              # bottom labels only, minimal
+              add(f'''
+<line x1="{GRID_X}" y1="437" x2="{GRID_X + STEP_X * 53 - GAP}" y2="437" stroke="#14324a" stroke-width="1"/>
+<text x="{GRID_X}" y="455" class="small">{first_date} — {last_date}</text>
+<text x="{GRID_X + STEP_X * 53 - GAP}" y="455" text-anchor="end" class="small">{total_contributions:,} public contributions</text>
+''')
+
+              add('</svg>')
+              return "\n".join(lines)
+
+          def main():
+              login = os.environ.get("GITHUB_REPOSITORY_OWNER", LOGIN_DEFAULT)
+              raw_weeks, total_contributions = github_weeks(login)
+              weeks = normalize_weeks(raw_weeks)
+              out = svg(weeks, login, total_contributions)
+
+              out_path = Path("dist/activity-signal.svg")
+              out_path.parent.mkdir(parents=True, exist_ok=True)
+              out_path.write_text(out, encoding="utf-8")
+              print(f"Generated {out_path} ({out_path.stat().st_size:,} bytes)")
+
+          if __name__ == "__main__":
+              try:
+                  main()
               except Exception as exc:
-                  print(f'ERROR: {exc}',file=sys.stderr)
+                  print(f"ERROR: {exc}", file=sys.stderr)
                   sys.exit(1)
           PYTHON
 
