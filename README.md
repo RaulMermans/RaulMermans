@@ -89,7 +89,7 @@ Other experiments: **[DataBrief AI](https://github.com/RaulMermans/DataBrief-AI)
 
 
 
-![Activity Signal — GitHub contributions](https://raw.githubusercontent.com/RaulMermans/RaulMermans/activity-signal/activity-signal.svg)
+![Activity Signal — GitHub contributions](https://raw.githubusercontent.com/RaulMermans/RaulMermans/activity-signal/activity-signal.svg?v=2)
 
 
 
