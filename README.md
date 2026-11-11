@@ -47,7 +47,7 @@ A source-aware marketing analytics workspace for Meta Ads, Google Ads, and Shopi
 </tr>
 <tr>
 <td width="50%" valign="top">
-<strong><a href="https://github.com/RaulMermans/Open-VS-Code-Agent">Open VS Code Agent ↗</a></strong><br/>
+<strong><a href="https://github.com/RaulMermans/Open_VS_Code">Open VS Code Agent ↗</a></strong><br/>
 A coding-agent system optimized for a local 7B open-weight model, with strict tool boundaries and reproducible evaluation.<br/><br/>
 <sub>Ollama · Local inference · 37.5% → 75% success on a 24-task read-only benchmark · Public architecture edition</sub>
 </td>
