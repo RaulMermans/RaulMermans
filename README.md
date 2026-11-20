@@ -38,39 +38,39 @@ Local-first agent debugging infrastructure for execution capture, offline replay
 <td width="50%" valign="top">
 <strong><a href="https://github.com/RaulMermans/Open_VS_Code">Open VS Code Agent ↗</a></strong><br/>
 <strong>Measure the agent, not just the demo.</strong><br/><br/>
-Local coding agent powered by open-weight models, with bounded tools, permission controls, and reproducible evaluation. Improved from 9/24 to 18/24 on a documented read-only benchmark; desktop acceptance remains in progress.<br/><br/>
+Local coding agent with open-weight models, bounded tools, and reproducible evaluation. Improved from 9/24 to 18/24 successful tasks on a documented read-only benchmark; desktop validation continues.<br/><br/>
 <sub>TypeScript · Qwen · Local inference · Active development</sub>
 </td>
 </tr>
 <tr>
 <td width="50%" valign="top">
 <strong><a href="https://github.com/RaulMermans/OpsTwin">OpsTwin ↗</a></strong><br/>
-<strong>Test operational changes before implementing them.</strong><br/><br/>
+<strong>Test operational changes before rollout.</strong><br/><br/>
 Deployed decision-support software comparing staffing and service-workflow scenarios through paired simulations, explicit constraints, and uncertainty-aware results.<br/><br/>
 <sub>Next.js · FastAPI · SimPy · <a href="https://ops-twin.vercel.app">Live demo</a></sub>
 </td>
 <td width="50%" valign="top">
 <strong><a href="https://github.com/RaulMermans/Eyes-Without-A-Face">Eyes Without a Face ↗</a></strong><br/>
-<strong>Build integrations without exposing private records.</strong><br/><br/>
-Privacy-aware integration builder that uses on-device analysis and fictional data stand-ins to propose cloud-assisted field mappings, then validates them against real records locally.<br/><br/>
+<strong>Integrate without exposing private data.</strong><br/><br/>
+Privacy-aware integration builder using on-device analysis and fictional data stand-ins for cloud-assisted field mappings. Real records stay local during validation and export.<br/><br/>
 <sub>Hybrid AI · Gemini · Firebase · Assisted mapper · <a href="https://eyes-without-a-face-b7281.web.app">Demo</a></sub>
 </td>
 </tr>
 <tr>
 <td width="50%" valign="top">
 <strong><a href="https://github.com/RaulMermans/moody-blues">Moody Blues ↗</a></strong><br/>
-<strong>Test what agents do. Verify what actually happened.</strong><br/><br/>
-Controlled fault-injection environment that evaluates agent claims against independently checked state. Reproduced 28/28 documented failures on scripted targets.<br/><br/>
+<strong>Verify what an AI agent actually did.</strong><br/><br/>
+Fault-injection testbed for AI agents, comparing reported outcomes against independently inspected state. Reproduced 28/28 documented failures on scripted targets.<br/><br/>
 <sub>Python · Docker · Agent testing · Developer alpha</sub>
 </td>
 <td width="50%" valign="top">
-<strong><a href="https://github.com/RaulMermans/cultural-elasticity">Cultural Elasticity ↗</a></strong><br/>
-<strong>Research cultural relevance with evidence.</strong><br/><br/>
-Agentic cultural research workflow using Claude and Qloo to investigate brand territories through bounded tool calls, traceable data, and evidence-linked reporting.<br/><br/>
-<sub>AI agents · Qloo · Commercial intelligence · Research prototype</sub>
+<strong><a href="https://github.com/RaulMermans/AETHRA">AETHRA · NASA Space Apps ↗</a></strong><br/>
+<strong>Earth data. Testable insights. Clear limits.</strong><br/><br/>
+Team-built NASA Space Apps 2026 project turning Earth data into testable climate trends. Contributed Python analysis, evidence cards, interactive mapping, and release validation.<br/><br/>
+<sub>NASA Space Apps 2026 · Python · CesiumJS · <a href="https://nasa-project-spain.vercel.app/explore">Live app</a></sub>
 </td>
 </tr>
-</table>
+</table>>
 
 ---
 
@@ -82,7 +82,7 @@ Agentic cultural research workflow using Claude and Qloo to investigate brand te
 
 ### Beyond AI infrastructure
 
-**[BI Notebook Lab](https://github.com/RaulMermans/bi-notebook-lab)** ([Demo](https://raulmermans.github.io/bi-notebook-lab/)) · **[DemandOS](https://github.com/RaulMermans/demand-OS)** · **[Relay](https://github.com/RaulMermans/Relay)** · **[DataBrief AI](https://github.com/RaulMermans/DataBrief-AI)** · **[SearchSignal](https://github.com/RaulMermans/SearchSignal)** · **[Website Audit Agent](https://github.com/RaulMermans/website-auditor)**
+**[Cultural Elasticity](https://github.com/RaulMermans/cultural-elasticity)** · **[BI Notebook Lab](https://github.com/RaulMermans/bi-notebook-lab)** ([Demo](https://raulmermans.github.io/bi-notebook-lab/)) · **[DemandOS](https://github.com/RaulMermans/demand-OS)** · **[Relay](https://github.com/RaulMermans/Relay)** · **[DataBrief AI](https://github.com/RaulMermans/DataBrief-AI)** · **[SearchSignal](https://github.com/RaulMermans/SearchSignal)** · **[Website Audit Agent](https://github.com/RaulMermans/website-auditor)**
 
 Additional work across analytics, simulation, automation, learning tools, and commercial decision-making. BI Notebook Lab includes an executable DAX learning engine with documented test coverage and conformance cases.
 
