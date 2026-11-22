@@ -77,7 +77,7 @@ Team-built NASA Space Apps 2026 project turning Earth data into testable climate
 ### Engineering in progress
 
 - **[IRIS OS](https://github.com/RaulMermans/IRIS-OS)** — Experimental personal AI environment for specialist-agent orchestration, context, memory, and controlled execution. Public repository documents the architecture.
-- **[HALO Control](https://github.com/RaulMermans/AMD-HALO-Control)** — Local AI infrastructure exploring model routing, workload management, and resource observability. Runtime acceptance remains incomplete.
+- **[HALO Control](https://github.com/RaulMermans/AMD-HALO-Control)** — Local-first AI compute control plane. Operator-supervised inference admission and governed 4B/14B-class runtime lifecycle physically exercised on AMD Halo (November 2026). [Public acceptance evidence](https://github.com/RaulMermans/AMD-HALO-Control/blob/main/docs/PHYSICAL_ACCEPTANCE_2026-11-22.md); private implementation, single-host pilot—not production certification.
 - **[AAO / Applied AI Operations](https://github.com/RaulMermans/applied-ai-operations)** — Reusable infrastructure for AI workflow controls, approvals, integrations, and execution governance.
 
 ### Beyond AI infrastructure
